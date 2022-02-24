@@ -13,8 +13,8 @@ static int descriptor = 0;//variable global estática descriptor fichero
  * o -1 (o EXIT_FAILURE) en caso contrario.
  */
 int bmount(const char *camino){
-
-    descriptor = open(camino, O_RDWR | O_CREAT, 0666);
+    umask(000);
+    descriptor = open(camino, O_RDWR|O_CREAT, 0666);
     if (descriptor == -1){
         perror("intento fallido de abrir el fichero.");
         return EXIT_FAILURE;
@@ -38,6 +38,7 @@ int bumount(){
     }
         return EXIT_SUCCESS;
 }
+
 /*
 * Función bwrite():
 * ---------------------------------------------
@@ -54,11 +55,11 @@ int bwrite(unsigned int nbloque, const void *buf){
     //Posicionamos el puntero
     if(lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET) == -1){
         //Error al posicionar el puntero
-        perror("posicionamiento incorrecto.");
+        fprintf(stderr, "Error %d: %s\n", errno, strerror(errno)); 
         return EXIT_FAILURE; //-1
     }
     //Volcamos el contenido del buffer
-    bytes = write(descriptor, buf, BLOCKSIZE);
+    bytes = write(descriptor, &buf, BLOCKSIZE);
     //Control de errores
     if(bytes < 0){
         perror("escritura incorrecta");
@@ -81,15 +82,14 @@ int bread(unsigned int nbloque, void *buf){
     int nbytes;
     //Posicionamiento del puntero
     if (lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET)==-1){
-        perror("posicionamiento incorrecto.");
+        fprintf(stderr, "Error %d: %s\n", errno, strerror(errno)); 
         return EXIT_FAILURE;
     }
     //Lectura
     nbytes = read(descriptor, buf, BLOCKSIZE);
     if (nbytes == -1){
-        perror("lectura incorrecta");
+        fprintf(stderr, "Error %d: %s\n", errno, strerror(errno)); 
         return EXIT_FAILURE;
     }
     return nbytes;//devolvemos número de bytes leídos
-
 }
