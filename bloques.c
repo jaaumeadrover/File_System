@@ -1,29 +1,95 @@
 #include "bloques.h"
 
-static int descriptor=0;
+static int descriptor = 0;//variable global estática descriptor fichero
 
-
-
-
+/**
+ *  Función: bumount:
+ * ---------------------------------------------------------------------
+ * params: const char *camino
+ * 
+ * Desmonta el dispositivo virtual.
+ * 
+ * Devuelve 0 (o EXIT_SUCCESS) si se ha cerrado el fichero correctamente,
+ * o -1 (o EXIT_FAILURE) en caso contrario.
+ */
 int bmount(const char *camino){
 
-    descriptor = open(camino, O_RDWR|O_CREAT, 0666);
+    descriptor = open(camino, O_RDWR | O_CREAT, 0666);
+    if (descriptor == -1){
+        perror("intento fallido de abrir el fichero.");
+        return EXIT_FAILURE;
+    }
     return descriptor;
 }
-
+/*
+* Función bumount():
+* ---------------------------------------------
+* params:
+* 
+* Desmonta el dispositivo virtual. Básicamente 
+* llama a la función close() para liberar el descriptor de ficheros.
+* 
+* Devuelve 0 (o EXIT_SUCCESS) si se ha cerrado el 
+* fichero correctamente, o -1 (o EXIT_FAILURE) en caso contrario.
+*/
 int bumount(){
-    int close(descriptor);
-    if(close==EXIT_SUCCESS){
-        //print se ha creado con éxito
-    }else if(close==EXIT_FAILURE){
-        perror(" No se ha podido cerrar el fichero.");
+    if (close(descriptor) == -1){
+        return EXIT_FAILURE;
     }
+        return EXIT_SUCCESS;
 }
+/*
+* Función bwrite():
+* ---------------------------------------------
+* params: unsigned int nbloque, const void *buf
+* 
+* Escribe 1 bloque en el dispositivo virtual, 
+* en el bloque físico especificado por nbloque.
+* 
+* Devuelve el numero de bytes que se han escrito en el disco
+*/
 int bwrite(unsigned int nbloque, const void *buf){
-
+    int bytes;
+    
+    //Posicionamos el puntero
+    if(lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET) == -1){
+        //Error al posicionar el puntero
+        perror("posicionamiento incorrecto.");
+        return EXIT_FAILURE; //-1
+    }
+    //Volcamos el contenido del buffer
+    bytes = write(descriptor, buf, BLOCKSIZE);
+    //Control de errores
+    if(bytes < 0){
+        perror("escritura incorrecta");
+        return EXIT_FAILURE;
+    }
+    return bytes;
 }
-
+/*
+* Función bread:
+* -------------------------------------
+* params: unsigned int nbloque, void *buf.
+* 
+* Lee un bloque en el dispositivo virtual, en el bloque físico 
+* especificado por nbloque.
+*
+* Devuelve el nº de bytes que ha podido leer (si ha ido bien, 
+* será BLOCKSIZE), o -1 (o EXIT_FAILURE) si se produce un error.
+*/
 int bread(unsigned int nbloque, void *buf){
+    int nbytes;
+    //Posicionamiento del puntero
+    if (lseek(descriptor, nbloque * BLOCKSIZE, SEEK_SET)==-1){
+        perror("posicionamiento incorrecto.");
+        return EXIT_FAILURE;
+    }
+    //Lectura
+    nbytes = read(descriptor, buf, BLOCKSIZE);
+    if (nbytes == -1){
+        perror("lectura incorrecta");
+        return EXIT_FAILURE;
+    }
+    return nbytes;//devolvemos número de bytes leídos
 
 }
-
