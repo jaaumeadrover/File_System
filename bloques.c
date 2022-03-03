@@ -47,7 +47,7 @@ int bumount(){
 * Escribe 1 bloque en el dispositivo virtual, 
 * en el bloque físico especificado por nbloque.
 * 
-* Devuelve el numero de bytes que se han escrito en el disco
+* Devuelve el numero de bytes que se han escrito en el disco.
 */
 int bwrite(unsigned int nbloque, const void *buf){
     int bytes;
