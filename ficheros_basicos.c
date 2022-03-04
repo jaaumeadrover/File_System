@@ -48,6 +48,7 @@ if(bwrite(posSB,&SB)==-1){
 return EXIT_SUCCESS;
 }
 
+
 int initMB()
 { // forcializa el mapa de bits.
 unsigned char bufferMB[BLOCKSIZE];
@@ -61,6 +62,8 @@ memset(bufferMB, 0, BLOCKSIZE);
 if(bread(posSB,buf)==-1){
     return EXIT_FAILURE;
 }
+
+
 int posInicialMB=buf[0];
 
 //volcamos el buffer a memoria
@@ -75,22 +78,28 @@ for(int i=posInicialMB;i<tamañoMB;i++){
 
 int initAI()
 {
-    SB.totinodos = ninodos struct inodo inodos[BLOCKSIZE / INODOSIZE]... contInodos : = SB.posPrimerInodoLibre + 1; // si hemos inicializado SB.posPrimerInodoLibre = 0
-    for (i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++)
+    struct superbloque SB;
+    bread(posSB,&SB);
+    SB.totInodos = ninodos;
+    struct inodo inodos[BLOCKSIZE / INODOSIZE];
+    int contInodos = SB.posPrimerInodoLibre + 1; // si hemos inicializado SB.posPrimerInodoLibre = 0
+    for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++)
     { // para cada bloque del AI
-        for (j = 0; j < BLOCKSIZE / INODOSIZE; j++)
-        {                           // para cada inodo del AI
-            inodos[j].tipo : = ‘l’; // libre
+        bread(i, inodos);
+        for (int j = 0; j < BLOCKSIZE / INODOSIZE; j++)
+        {                         // para cada inodo del AI
+            inodos[j].tipo = "l"; // libre
             if (contInodos < SB.totInodos)
-            {                                                 // si no hemos llegado al último inodo
-                inodos[j].punterosDirectos[0] : = contInodos; // enlazamos con el siguiente
+            {                                               // si no hemos llegado al último inodo
+                inodos[j].punterosDirectos[0] = contInodos; // enlazamos con el siguiente
                 contInodos++;
             }
             else
             { // hemos llegado al último inodo
-                inodos[j].punterosDirectos[0] : = UINT_MAX;
+                inodos[j].punterosDirectos[0] = UINT_MAX;
                 // hay que salir del bucle, el último bloque no tiene por qué estar completo !!!
             }
         }
+        bwrite(i, inodos);
     }
 }
