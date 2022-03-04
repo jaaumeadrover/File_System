@@ -52,26 +52,22 @@ return EXIT_SUCCESS;
 int initMB()
 { // forcializa el mapa de bits.
 unsigned char bufferMB[BLOCKSIZE];
-int buf[BLOCKSIZE];
-int tamañoMB = tamMB();
+struct superbloque SB;
 
 //escribimos a 0 todas las posiciones del buffer
 memset(bufferMB, 0, BLOCKSIZE);
 
 //lectura SB
-if(bread(posSB,buf)==-1){
+if(bread(posSB,&SB)==-1){
     return EXIT_FAILURE;
 }
 
-
-int posInicialMB=buf[0];
+int posInicialMB=SB.posPrimerBloqueMB;
+int posFinalMB = SB.posUltimoBloqueMB;
 
 //volcamos el buffer a memoria
-for(int i=posInicialMB;i<tamañoMB;i++){
+for(int i=posInicialMB;i<=posFinalMB;i++){
     bwrite(i,bufferMB);
-}
-{
-
 }
 
 }
