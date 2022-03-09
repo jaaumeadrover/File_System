@@ -1,4 +1,5 @@
 #include "bloques.h"
+#include "ficheros_basico.h"
 int fd; //file descriptor
 char* buf;
 
@@ -6,6 +7,7 @@ int main(int argc, char **argv){
     //ATRIBUTOS
     char *camino = argv[1];
     int nbloques = atoi(argv[2]);
+    int ninodos=nbloques/4;
     unsigned char buf[BLOCKSIZE];
 
     //Reservamos espacio
@@ -24,7 +26,7 @@ int main(int argc, char **argv){
         fprintf(stderr, "Error al montar el dispositivo.\n");
         return EXIT_FAILURE;
     }
-
+    
     //Escritura
     for (int i = 0; i < nbloques; i++){
         if (bwrite(i, buf) == -1){
@@ -32,7 +34,9 @@ int main(int argc, char **argv){
             return EXIT_FAILURE;
         }
     }
-
+    initSB(nbloques,ninodos);
+    initMB();
+    initAI();
     //DESMONTAR
     bumount(); //file descriptor
 }

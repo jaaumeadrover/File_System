@@ -59,13 +59,15 @@ int bwrite(unsigned int nbloque, const void *buf){
         return EXIT_FAILURE; //-1
     }
     //Volcamos el contenido del buffer
-    bytes = write(descriptor, &buf, BLOCKSIZE);
+    bytes = write(descriptor, buf, BLOCKSIZE);
     //Control de errores
     if(bytes < 0){
         perror("escritura incorrecta");
         return EXIT_FAILURE;
     }
     return bytes;
+    
+   
 }
 /*
 * Función bread:
@@ -87,7 +89,7 @@ int bread(unsigned int nbloque, void *buf){
     }
     //Lectura
     nbytes = read(descriptor, buf, BLOCKSIZE);
-    if (nbytes == -1){
+    if (nbytes < 0){
         fprintf(stderr, "Error %d: %s\n", errno, strerror(errno)); 
         return EXIT_FAILURE;
     }
