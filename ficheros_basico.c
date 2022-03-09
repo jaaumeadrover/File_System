@@ -15,17 +15,18 @@ int tamMB(unsigned int nbloques){ // Calcula el tamaño en bloques necesario par
 }
 
 int tamAI(unsigned int ninodos){ // Calcula el tamaño en bloques del array de inodos.
-    int AIsize = (ninodos * INODOSIZE) / BLOCKSIZE;
-    if ((AIsize) % BLOCKSIZE){
+    int AIsize = ((ninodos * INODOSIZE)/ BLOCKSIZE);
+    if ((ninodos * INODOSIZE)%BLOCKSIZE){
         AIsize++;
     }
     return AIsize;
+
 }
 
 int initSB(unsigned int nbloques, unsigned int ninodos){ // Inic.
     struct superbloque SB;
     //SB.posPrimerBloqueMB = posSB + tamSB;
-    SB.posPrimerBloqueMB = 1;
+    SB.posPrimerBloqueMB = posSB + tamSB;
     SB.posUltimoBloqueMB = SB.posPrimerBloqueMB + tamMB(nbloques) - 1;
     SB.posPrimerBloqueAI = SB.posUltimoBloqueMB + 1;
     SB.posUltimoBloqueAI = SB.posPrimerBloqueAI + tamAI(ninodos) - 1;
@@ -64,7 +65,7 @@ int posFinalMB = SB.posUltimoBloqueMB;
 for(int i=posInicialMB;i<=posFinalMB;i++){
     bwrite(i,bufferMB);
 }
-
+    return EXIT_SUCCESS;
 }
 
 int initAI(){
@@ -86,4 +87,5 @@ int initAI(){
         }
         bwrite(i, inodos);
     }
+    return EXIT_SUCCESS;
 }
