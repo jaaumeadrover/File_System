@@ -58,7 +58,7 @@ int main(int argc, char const *argv[])
 
         for (int j = 0; j < BLOCKSIZE / INODOSIZE; j++)
         {
-            if ((inodos[j].tipo == 'l'))
+            if (inodos[j].tipo == 'l')
             {
                 contlibres++;
                 if (contlibres < 20)
