@@ -12,6 +12,7 @@
 #define INDIRECTOS1 (NPUNTEROS * NPUNTEROS + INDIRECTOS0)             // 65.804
 #define INDIRECTOS2 (NPUNTEROS * NPUNTEROS * NPUNTEROS + INDIRECTOS1) // 16.843.020
 
+
 int tamMB(unsigned int nbloques);
 int tamAI(unsigned int ninodos);
 int initSB(unsigned int nbloques, unsigned int ninodos);
@@ -24,7 +25,9 @@ int liberar_bloque(unsigned int nbloque);
 int escribir_inodo(unsigned int ninodo, struct inodo inodo);
 int leer_inodo(unsigned int ninodo, struct inodo *inodo);
 int reservar_inodo(unsigned char tipo, unsigned char permisos);
-
+int obtener_nRangoBL (struct inodo *inodo, unsigned int nblogico, unsigned int *ptr);
+int obtener_indice (unsigned int nblogico, int nivel_punteros);
+int traducir_bloque_inodo(int ninodo, int nblogico, char reservar);
 
 struct superbloque {
    unsigned int posPrimerBloqueMB;          // Posición absoluta del primer bloque del mapa de bits
