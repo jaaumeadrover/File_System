@@ -1,4 +1,4 @@
-#include "bloques.h"
+
 #include "ficheros_basico.h"
 int fd; //file descriptor
 char* buf;
@@ -9,6 +9,7 @@ int main(int argc, char **argv){
     int nbloques = atoi(argv[2]);
     int ninodos=nbloques/4;
     unsigned char buf[BLOCKSIZE];
+    
 
     //Reservamos espacio
     if (!memset(buf, 0, BLOCKSIZE)){
@@ -37,6 +38,8 @@ int main(int argc, char **argv){
     initSB(nbloques,ninodos);
     initMB();
     initAI();
+    reservar_inodo ('d', 7);
+
     //DESMONTAR
     bumount(); //file descriptor
 }
