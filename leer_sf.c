@@ -43,44 +43,44 @@ int main(int argc, char const *argv[])
     printf("\nsizeof struct superbloque: %ld\n", sizeof(struct superbloque));
     printf("sizeof struct inodo:  %ld\n", sizeof(struct inodo));
 
-    printf("\nRECORRIDO LISTA ENLAZADA DE INODOS LIBRES\n");
-    //Podéis hacer también un recorrido de la lista de inodos libres (mostrando para cada inodo el campo punterosDirectos[0]).
-    struct inodo inodos[BLOCKSIZE / INODOSIZE];
-    int contlibres = 0;
+    // printf("\nRECORRIDO LISTA ENLAZADA DE INODOS LIBRES\n");
+    // //Podéis hacer también un recorrido de la lista de inodos libres (mostrando para cada inodo el campo punterosDirectos[0]).
+    // struct inodo inodos[BLOCKSIZE / INODOSIZE];
+    // int contlibres = 0;
 
-    for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++){
+    // for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++){
 
-        if (bread(i, inodos) == EXIT_FAILURE)
-        {
-            return EXIT_FAILURE;
-        }
+    //     if (bread(i, inodos) == EXIT_FAILURE)
+    //     {
+    //         return EXIT_FAILURE;
+    //     }
 
-        for (int j = 0; j < BLOCKSIZE / INODOSIZE; j++)
-        {
-            if (inodos[j].tipo == 'l')
-            {
-                contlibres++;
-                if (contlibres < 20)
-                {
-                    printf("%d ", contlibres);
-                }
-                else if (contlibres == 21)
-                {
-                    printf("... ");
-                }
-                else if ((contlibres > 24990) && (contlibres < SB.totInodos))
-                {
-                    printf("%d ", contlibres);
-                }
-                else if (contlibres == SB.totInodos)
-                {
-                    printf("-1 \n");
-                }
-                contlibres--;
-            }
-            contlibres++;
-        }
-    }
+    //     for (int j = 0; j < BLOCKSIZE / INODOSIZE; j++)
+    //     {
+    //         if (inodos[j].tipo == 'l')
+    //         {
+    //             contlibres++;
+    //             if (contlibres < 20)
+    //             {
+    //                 printf("%d ", contlibres);
+    //             }
+    //             else if (contlibres == 21)
+    //             {
+    //                 printf("... ");
+    //             }
+    //             else if ((contlibres > 24990) && (contlibres < SB.totInodos))
+    //             {
+    //                 printf("%d ", contlibres);
+    //             }
+    //             else if (contlibres == SB.totInodos)
+    //             {
+    //                 printf("-1 \n");
+    //             }
+    //             contlibres--;
+    //         }
+    //         contlibres++;
+    //     }
+    // }
     printf("\nRESERVAMOS UN BLOQUE Y LUEGO LO LIBERAMOS:\n");
     int reservado = reservar_bloque(); // Actualiza el SB
     bread(posSB, &SB);                 // Actualizar los valores del SB
