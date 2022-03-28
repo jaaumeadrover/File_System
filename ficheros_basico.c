@@ -424,15 +424,19 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos){
         inodoAuxiliar.punterosDirectos[i] = 0;
     }
 
+    
     if (escribir_inodo(posInodoReservado, inodoAuxiliar) == EXIT_FAILURE){
         return EXIT_FAILURE;
     }
+    struct inodo debug;
+    leer_inodo(posInodoReservado,&debug);
+
 
     if (bwrite(posSB, &SB) == EXIT_FAILURE){
         return EXIT_FAILURE;
     }
     // Escribimos el superbloque actualizado
-    return EXIT_SUCCESS;
+    return posInodoReservado;
 }
 
 int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *ptr){
@@ -450,7 +454,7 @@ int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *p
         return 3;
     }else{
         *ptr = 0;
-        error("Bloque lógico fuera de rango");
+        perror("Bloque lógico fuera de rango");
         return -1;
     }
 }
@@ -476,6 +480,7 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros){
             return ((nblogico - INDIRECTOS1) % (NPUNTEROS * NPUNTEROS)) % NPUNTEROS;
         }
     }
+    return -1;
 }
 
 int traducir_bloque_inodo(int ninodo, int nblogico, char reservar){
@@ -501,8 +506,14 @@ int traducir_bloque_inodo(int ninodo, int nblogico, char reservar){
                 inodo.ctime = time(NULL); // fecha actual
                 if (nivel_punteros == nRangoBL){                                                 // el bloque cuelga directamente del inodo
                     inodo.punterosIndirectos[nRangoBL - 1] = ptr; // (imprimirlo para test)
+                        printf("[traducir_bloque_inodo()→ inodo.punterosIndirectos[%i] = %i (reservado BF %i para punteros_nivel%i)]\n",
+                           nRangoBL-1, ptr, ptr, nivel_punteros);
+
                 }else{                            // el bloque cuelga de otro bloque de punteros
-                    buffer[indice] = ptr;    // (imprimirlo para test)
+                    buffer[indice] = ptr;
+                    
+                    printf("[traducir_bloque_inodo()→ inodo.punteros_nivel%i[%i] = %i (reservado BF %i para punteros_nivel%i)]\n",
+                           nivel_punteros+1, indice, ptr, ptr, nivel_punteros);   // (imprimirlo para test)
                     bwrite(ptr_ant, buffer); // salvamos en el dispositivo el buffer de punteros modificado
                 }
                 memset(buffer, 0, BLOCKSIZE); // ponemos a 0 todos los punteros del buffer
@@ -528,9 +539,13 @@ int traducir_bloque_inodo(int ninodo, int nblogico, char reservar){
             inodo.numBloquesOcupados++;
             inodo.ctime = time(NULL);
             if (nRangoBL == 0){
-                inodo.punterosDirectos[nblogico] = ptr; // (imprimirlo para test)
+                inodo.punterosDirectos[nblogico] = ptr; //
+                printf("[traducir_bloque_inodo()→ inodo.punterosDirectos[%i] = %i (reservado BF %i para BL %i)]\n",
+                       nblogico, ptr, ptr, nblogico);
             }else{
                 buffer[indice] = ptr;    // asignamos la dirección del bloque de datos (imprimirlo para test)
+                printf("[traducir_bloque_inodo()→ inodo.punteros_nivel1[%i] = %i (reservado BF %i para BL %i)]\n",
+                       indice, ptr, ptr, nblogico);
                 bwrite(ptr_ant, buffer); // salvamos en el dispositivo el buffer de punteros modificado
             }
         }
@@ -539,4 +554,63 @@ int traducir_bloque_inodo(int ninodo, int nblogico, char reservar){
         escribir_inodo(ninodo, inodo); // sólo si lo hemos actualizado
     }
     return ptr; // nº de bloque físico correspondiente al bloque de datos lógico, nblogico
+}
+
+
+int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes){
+    struct inodo inodo;
+    unsigned int primerBL,ultimoBL,desp1;
+    if(leer_inodo(ninodo,&inodo)==EXIT_FAILURE){
+        fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
+        return EXIT_FAILURE;
+    }
+
+    if ((inodo.permisos & 2) != 2){
+        primerBL=offset/BLOCKSIZE;
+        ultimoBL = (offset + nbytes - 1) / BLOCKSIZE;
+        
+        desp1 = offset % BLOCKSIZE;
+    }
+    
+}
+
+
+int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes){
+
+}
+
+
+int mi_stat_f(unsigned int ninodo, struct STAT *p_stat){
+    struct inodo inodo;
+    if(leer(ninodo,&inodo)==EXIT_FAILURE){
+        fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
+        return EXIT_FAILURE;
+    }
+
+    //init type and permissions
+    p_stat->tipo=inodo.tipo;
+    p_stat->permisos=inodo.permisos;
+    //init entry links in directory
+    p_stat->nlinks=inodo.nlinks;
+    //init size
+    p_stat->tamEnBytesLog=inodo.tamEnBytesLog;
+    //init timestamps
+    p_stat->atime=inodo.atime;
+    p_stat->mtime=inodo.mtime;
+    p_stat->ctime=inodo.ctime;
+
+    //init fulfilled blocks
+    p_stat->numBloquesOcupados=inodo.numBloquesOcupados;
+
+}
+
+int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
+    struct inodo inodo;
+    if(leer_inodo(ninodo, &inodo)==EXIT_FAILURE){
+        fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
+        return EXIT_FAILURE;
+        }
+    inodo.permisos = permisos;
+    inodo.ctime = time(NULL);
+    return EXIT_SUCCESS;
 }

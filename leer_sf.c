@@ -2,8 +2,8 @@
 //CONSTANTES PARA DEBUG DE CADA RESPECTIVO NIVEL
 #define DEBUGN1 0
 #define DEBUGN2 0
-#define DEBUGN3 1
-#define DEBUGN4 0
+#define DEBUGN3 0
+#define DEBUGN4 1
 
 
 //La ejecución de leer_sf.c permite mostrar el contenido del superbloque.
@@ -132,7 +132,7 @@ int main(int argc, char const *argv[]){
         printf("Número de bloques ocupados: %i\n", inodo.numBloquesOcupados);
     #endif
 
-    #if DEBUG4
+    #if DEBUGN4
 
         int inodoReservado = reservar_inodo('f',6);
         bread(posSB, &SB);
