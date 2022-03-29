@@ -50,7 +50,7 @@ int tamAI(unsigned int ninodos){
  * Inicializa los datos del superbloque.
  *
  * Devuelve EXIT_FAILURE en caso de un error de escritura o
- * EXIT_SUCCESS en caso de no haber error.
+ * EXIT_SUCCESS en caso de no haberlo.
  */
 int initSB(unsigned int nbloques, unsigned int ninodos){
     struct superbloque SB;
@@ -84,7 +84,7 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
  * los metadatos.
  *
  * Devuelve EXIT_FAILURE en caso de error o EXIT_SUCCESS en
- * caso de no haber error.
+ * caso de no haberlo.
  */
 int initMB(){
     // DECLARACIONES ATRIBUTOS
@@ -126,7 +126,7 @@ int initMB(){
  * Inicializa la lista de inodos libres.
  *
  * Devuelve EXIT_FAILURE en caso de error o EXIT_SUCCESS en caso
- * de no haber error.
+ * de no haberlo.
  */
 int initAI(){
     struct superbloque SB;
@@ -160,6 +160,17 @@ int initAI(){
     return EXIT_SUCCESS;
 }
 
+/**
+ *  Función: escribir_bit:
+ * ---------------------------------------------------------------------
+ * params:unsigned int nbloque, unsigned int bit
+ *
+ * Escribe el valor indicado por el parámetro bit: 0 (libre) ó 1 (ocupado) en un
+ * determinado bit del MB que representa el bloque nbloque
+ *
+ * Devuelve EXIT_FAILURE en caso de error o EXIT_SUCCESS en caso
+ * de no haberlo.
+ */
 int escribir_bit(unsigned int nbloque, unsigned int bit){
     struct superbloque SB;
     // lectura para inicializar SB con datos del super bloque
@@ -198,6 +209,17 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
     return EXIT_SUCCESS;
 }
 
+
+/**
+ *  Función: leer_bit:
+ * ---------------------------------------------------------------------
+ * params:unsigned int nbloque
+ *
+ * Lee un determinado bit del MB.
+ *
+ * Devuelve EXIT_FAILURE en caso de error o el valor del bit leido en 
+ * caso de no haberlo
+ */
 char leer_bit(unsigned int nbloque){
     struct superbloque SB;
     // lectura superbloque
@@ -234,6 +256,17 @@ char leer_bit(unsigned int nbloque){
     return mascara;
 }
 
+/**
+ *  Función: reservar_bloque:
+ * ---------------------------------------------------------------------
+ * params:
+ *
+ * Encuentra el primer bloque libre, consultando el MB (primer bit a 0), 
+ * lo ocupa
+ *
+ * Devuelve EXIT_FAILURE en caso de error o la posición absoluta del 
+ * bloque reservado
+ */
 int reservar_bloque(){
     //Declaraciones de atributos
     unsigned char bufferMB[BLOCKSIZE];
@@ -307,7 +340,17 @@ int reservar_bloque(){
 
 }
 
-int liberar_bloque(unsigned int nbloque){
+/**
+ *  Función: liberar_bloque:
+ * ---------------------------------------------------------------------
+ * params: unsigned int nbloque
+ *
+ * Libera un bloque determinado
+ *
+ * Devuelve EXIT_FAILURE en caso de error o el numero de bloque liberado
+ */
+int liberar_bloque(unsigned int nbloque)
+{
     struct superbloque SB;
     // lectura superbloque
     if (bread(posSB, &SB) == -1){
@@ -328,6 +371,17 @@ int liberar_bloque(unsigned int nbloque){
     return nbloque;
 }
 
+/**
+ *  Función: escribir_inodo:
+ * ---------------------------------------------------------------------
+ * params: unsigned int nbloque
+ *
+ * Escribe el contenido de una variable de tipo struct inodo en un 
+ * determinado inodo del array de inodos.
+ *
+ * Devuelve EXIT_FAILURE en caso de error o EXIT_SUCCESS en caso
+ * de no haberlo.
+ */
 int escribir_inodo(unsigned int ninodo, struct inodo inodo){
     // variables
     struct superbloque SB;
@@ -361,6 +415,17 @@ int escribir_inodo(unsigned int ninodo, struct inodo inodo){
     return EXIT_SUCCESS;
 }
 
+/**
+ *  Función: leer_inodo:
+ * ---------------------------------------------------------------------
+ * params: unsigned int ninodo, struct inodo *inodo
+ *
+ * Lee un determinado inodo del array de inodos para volcarlo en una 
+ * variable de tipo struct inodo pasada por referencia.
+ *
+ * Devuelve EXIT_FAILURE en caso de error o EXIT_SUCCESS en caso
+ * de no haberlo.
+ */
 int leer_inodo(unsigned int ninodo, struct inodo *inodo){
     struct superbloque SB;
 
@@ -384,6 +449,17 @@ int leer_inodo(unsigned int ninodo, struct inodo *inodo){
     return EXIT_SUCCESS;
 }
 
+/**
+ *  Función: reservar_inodo:
+ * ---------------------------------------------------------------------
+ * params: unsigned char tipo, unsigned char permisos
+ *
+ * Encuentra el primer inodo libre (dato almacenado en el superbloque), 
+ * lo reserva, devuelve su número y actualiza la lista enlazada de inodos 
+ * libres.
+ *
+ * Devuelve EXIT_FAILURE en caso de error o la posición del inodo reservado
+ */
 int reservar_inodo(unsigned char tipo, unsigned char permisos){
     struct superbloque SB;
     struct inodo inodoAuxiliar;
@@ -556,7 +632,7 @@ int traducir_bloque_inodo(int ninodo, int nblogico, char reservar){
 
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes){
     struct inodo inodo;
-    unsigned int primerBL,ultimoBL,desp1,desp2;
+    unsigned int primerBL,ultimoBL,desp1;
     if(leer_inodo(ninodo,&inodo)==EXIT_FAILURE){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
         return EXIT_FAILURE;
@@ -565,9 +641,8 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     if ((inodo.permisos & 2) != 2){
         primerBL=offset/BLOCKSIZE;
         ultimoBL = (offset + nbytes - 1) / BLOCKSIZE;
-
+        
         desp1 = offset % BLOCKSIZE;
-        desp2 = (offset + nbytes - 1) % BLOCKSIZE;
     }
     
 }
@@ -607,7 +682,7 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
     if(leer_inodo(ninodo, &inodo)==EXIT_FAILURE){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
         return EXIT_FAILURE;
-    }
+        }
     inodo.permisos = permisos;
     inodo.ctime = time(NULL);
     return EXIT_SUCCESS;
