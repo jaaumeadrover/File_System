@@ -160,8 +160,7 @@ int initAI(){
     return EXIT_SUCCESS;
 }
 
-int escribir_bit(unsigned int nbloque, unsigned int bit)
-{
+int escribir_bit(unsigned int nbloque, unsigned int bit){
     struct superbloque SB;
     // lectura para inicializar SB con datos del super bloque
     if (bread(posSB, &SB) == EXIT_FAILURE){
@@ -308,8 +307,7 @@ int reservar_bloque(){
 
 }
 
-int liberar_bloque(unsigned int nbloque)
-{
+int liberar_bloque(unsigned int nbloque){
     struct superbloque SB;
     // lectura superbloque
     if (bread(posSB, &SB) == -1){
@@ -363,8 +361,7 @@ int escribir_inodo(unsigned int ninodo, struct inodo inodo){
     return EXIT_SUCCESS;
 }
 
-int leer_inodo(unsigned int ninodo, struct inodo *inodo)
-{
+int leer_inodo(unsigned int ninodo, struct inodo *inodo){
     struct superbloque SB;
 
     if (bread(posSB, &SB) == EXIT_FAILURE){
@@ -559,7 +556,7 @@ int traducir_bloque_inodo(int ninodo, int nblogico, char reservar){
 
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes){
     struct inodo inodo;
-    unsigned int primerBL,ultimoBL,desp1;
+    unsigned int primerBL,ultimoBL,desp1,desp2;
     if(leer_inodo(ninodo,&inodo)==EXIT_FAILURE){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
         return EXIT_FAILURE;
@@ -568,8 +565,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     if ((inodo.permisos & 2) != 2){
         primerBL=offset/BLOCKSIZE;
         ultimoBL = (offset + nbytes - 1) / BLOCKSIZE;
-        
+
         desp1 = offset % BLOCKSIZE;
+        desp2 = (offset + nbytes - 1) % BLOCKSIZE;
     }
     
 }
@@ -609,7 +607,7 @@ int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
     if(leer_inodo(ninodo, &inodo)==EXIT_FAILURE){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
         return EXIT_FAILURE;
-        }
+    }
     inodo.permisos = permisos;
     inodo.ctime = time(NULL);
     return EXIT_SUCCESS;
