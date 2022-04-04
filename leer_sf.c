@@ -3,7 +3,7 @@
 #define DEBUGN1 0
 #define DEBUGN2 0
 #define DEBUGN3 0
-#define DEBUGN4 1
+#define DEBUGN4 0
 
 
 //La ejecución de leer_sf.c permite mostrar el contenido del superbloque.
