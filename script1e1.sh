@@ -1,6 +1,6 @@
 echo "################################################################################"
 echo "$ rm disco"
-º disco
+rm disco
 echo "$ ./mi_mkfs disco 100000"
 echo "#inicializamos el sistema de ficheros con 100.000 bloques"
 ./mi_mkfs disco 100000
