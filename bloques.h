@@ -10,6 +10,7 @@
  
 #define BLOCKSIZE 1024 // bytes
 #define EXIT_SUCCESS 0
+#define EXIT_FAILURE_1 -1
  
 int bmount(const char *camino);
 int bumount();
