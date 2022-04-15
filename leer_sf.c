@@ -12,22 +12,22 @@ int main(int argc, char const *argv[]){
     if (argc != 2)
     {
         fprintf(stderr, "Error sintaxis: ./leer_sf <nombre_dispositivo>\n");
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //Montaje del disco
-    if (bmount(argv[1]) == EXIT_FAILURE)
+    if (bmount(argv[1]) == EXIT_FAILURE_1)
     {
         fprintf(stderr, "Error al montar el dispositivo virtual.\n");
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //Leectura del superbloque del disco
     struct superbloque SB;
-    if (bread(posSB, &SB) == EXIT_FAILURE)
+    if (bread(posSB, &SB) == EXIT_FAILURE_1)
     {
         fprintf(stderr, "Error de lectura del superbloque.\n");
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //Contenido del superbloque.
@@ -56,8 +56,8 @@ int main(int argc, char const *argv[]){
 
         for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++){
 
-            if (bread(i, inodos) == EXIT_FAILURE){
-                return EXIT_FAILURE;
+            if (bread(i, inodos) == EXIT_FAILURE_1){
+                return EXIT_FAILURE_1;
             }
 
             for (int j = 0; j < BLOCKSIZE / INODOSIZE; j++){
@@ -170,9 +170,9 @@ int main(int argc, char const *argv[]){
 
 
     //Liberación
-    if (bumount() == EXIT_FAILURE){
+    if (bumount() == EXIT_FAILURE_1){
         fprintf(stderr, "Error al desmontar el dispositivo virtual.\n");
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     return EXIT_SUCCESS;
 }

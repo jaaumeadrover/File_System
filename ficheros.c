@@ -1,6 +1,15 @@
 #include "ficheros.h"
 
-
+/**
+ *  Función: mi_write_f:
+ * ---------------------------------------------------------------------
+ * params: unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes
+ *
+ * Función que escribe el contenido procedente de un buffer de memoria, buf_original,
+ * de tamaño nbytes, en un fichero/directorio (correspondiente al inodo pasado como argumento, ninodo).
+ *
+ * Devuelve el número de bites escritos si se ha realizado correctamente y en caso de error -1 
+ */
 int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offset, unsigned int nbytes){
     //Declaración de atributos
     struct inodo inodo;
@@ -9,15 +18,15 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     unsigned char buf_bloque[BLOCKSIZE];
 
     //Leemos el inodo
-    if(leer_inodo(ninodo,&inodo)==EXIT_FAILURE){
+    if(leer_inodo(ninodo,&inodo)==EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //Miramos si el inodo tiene permisos de escritura
     if ((inodo.permisos & 2) != 2){
         fprintf(stderr, "Error: El inodo no tiene permisos de escritura en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     primerBL=offset/BLOCKSIZE;
@@ -27,9 +36,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
     
     nbfisico = traducir_bloque_inodo(ninodo,primerBL,1);
 
-    if(bread(nbfisico,buf_bloque) == EXIT_FAILURE){
+    if(bread(nbfisico,buf_bloque) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
         
         
@@ -38,9 +47,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         
         memcpy(buf_bloque + desp1, buf_original, nbytes);
         escritosAux=bwrite(nbfisico,buf_bloque);
-        if(escritosAux==EXIT_FAILURE){
+        if(escritosAux==EXIT_FAILURE_1){
             fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
         escritos+=nbytes;
     }else { //Caso 2: primer bloque!= ultimo bloque
@@ -48,9 +57,9 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         //Primer BL
         memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE - desp1);   
         escritosAux=bwrite(nbfisico,buf_bloque);
-        if(escritosAux==EXIT_FAILURE){
+        if(escritosAux==EXIT_FAILURE_1){
             fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
         escritos+=escritosAux-desp1;
 
@@ -58,33 +67,33 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
         for (int i=primerBL+1;i<ultimoBL;i++){
             nbfisico = traducir_bloque_inodo(ninodo, i, 1);
             escritosAux=(bwrite(nbfisico, buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE));
-            if(escritosAux==EXIT_FAILURE){
+            if(escritosAux==EXIT_FAILURE_1){
                 fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-                return EXIT_FAILURE;
+                return EXIT_FAILURE_1;
             }
             escritos+=escritosAux;
         } 
 
         //ultimo BL
         nbfisico=traducir_bloque_inodo(ninodo, ultimoBL, 1);
-        if(bread(nbfisico,&buf_bloque) == EXIT_FAILURE){
+        if(bread(nbfisico,&buf_bloque) == EXIT_FAILURE_1){
             fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
         memcpy(buf_bloque, buf_original + (nbytes - desp2 - 1), desp2 + 1);
         
         escritosAux=bwrite(nbfisico,buf_bloque);
-        if(escritosAux==EXIT_FAILURE){
+        if(escritosAux==EXIT_FAILURE_1){
             fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
         escritos+=desp2+1;
     }
 
     //Leer el inodo actualizado
-    if(leer_inodo(ninodo,&inodo) == EXIT_FAILURE){
+    if(leer_inodo(ninodo,&inodo) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //Actualizamos el tamaño en bytes solo si hemos escrito más allá del fichero
@@ -95,21 +104,35 @@ int mi_write_f(unsigned int ninodo, const void *buf_original, unsigned int offse
 
     inodo.mtime=time(NULL);
 
-    if(escribir_inodo(ninodo,inodo) == EXIT_FAILURE){
+    if(escribir_inodo(ninodo,inodo) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     if(nbytes==escritos){
         return escritos;
     }
     fprintf(stderr,"EXPECTED %d bytes escritos, found %d.",nbytes,escritos);
-    return EXIT_FAILURE;
+    return EXIT_FAILURE_1;
 }
 
 
 
-
+/**
+ *  Función: mi_read_f:
+ * ---------------------------------------------------------------------
+ * params: unsigned int ninodo, void *buf_original, unsigned int offset, 
+ * unsigned int nbytes
+ *
+ * Lee información de un fichero/directorio (correspondiente al no de 
+ * inodo, ninodo, pasado como argumento) y la almacena en un buffer 
+ * de memoria, buf_original: le indicamos la posición de lectura inicial 
+ * offset con respecto al inodo (en bytes) y el número de bytes nbytes 
+ * que hay que leer.
+ *
+ * Devuelve la cantidad de bytes leidos si se ha realizado correctamente o 
+ * EXIT_FAILURE_1 en caso de error
+ */
 int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsigned int nbytes){
     //Declaración de atributos
     struct inodo inodo;
@@ -117,7 +140,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     int desp1, desp2, nbfisico, leidos = 0;
     unsigned char buf_bloque[BLOCKSIZE];
 
-    if(leer_inodo(ninodo,&inodo)==EXIT_FAILURE){
+    if(leer_inodo(ninodo,&inodo)==EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
         return leidos;
     }
@@ -152,9 +175,9 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     if(primerBL == ultimoBL){
         
         if(nbfisico!=-1){
-            if((bread(nbfisico, buf_bloque)) == (EXIT_FAILURE)){
+            if((bread(nbfisico, buf_bloque)) == (EXIT_FAILURE_1)){
                 fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-                return EXIT_FAILURE;
+                return EXIT_FAILURE_1;
             }
             memcpy(buf_original, buf_bloque + desp1, nbytes);
         }
@@ -163,9 +186,9 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
 
         //Primer BL
         memcpy(buf_bloque + desp1, buf_original, BLOCKSIZE - desp1);   
-        if(bread(nbfisico,buf_bloque)==EXIT_FAILURE){
+        if(bread(nbfisico,buf_bloque)==EXIT_FAILURE_1){
             fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
 
         //leemos bloques intermedios
@@ -173,9 +196,9 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
             nbfisico=traducir_bloque_inodo(ninodo,i,0);
             //si existe bloque físico
             if(nbfisico!=-1){
-                if(bread(nbfisico,buf_bloque)==EXIT_FAILURE){
+                if(bread(nbfisico,buf_bloque)==EXIT_FAILURE_1){
                     fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-                    return EXIT_FAILURE;
+                    return EXIT_FAILURE_1;
                 }
                 memcpy(buf_original + (BLOCKSIZE - desp1) + (i - primerBL - 1) * BLOCKSIZE, buf_bloque, BLOCKSIZE);
             }
@@ -186,9 +209,9 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
         nbfisico=traducir_bloque_inodo(ninodo, ultimoBL, 0);
         if(nbfisico != -1){
             //Lectura del bloque físico del disco
-            if(bread(nbfisico,buf_bloque) == EXIT_FAILURE){
+            if(bread(nbfisico,buf_bloque) == EXIT_FAILURE_1){
             fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
         //Averiguamos el ultimo byte que tenemos que leer del bloque
         memcpy(buf_bloque, buf_original + (nbytes - desp2 - 1), desp2 + 1);
@@ -202,7 +225,7 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     //Leer el inodo actualizado
     inodo.atime=time(NULL);
     //escribir inodo actualizado
-    if(escribir_inodo(ninodo,inodo)==EXIT_FAILURE){
+    if(escribir_inodo(ninodo,inodo)==EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
     }
 
@@ -211,17 +234,26 @@ int mi_read_f(unsigned int ninodo, void *buf_original, unsigned int offset, unsi
     if(nbytes==leidos){
         return leidos;
     }else{
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     
 }
 
-
+/**
+ *  Función: mi_stat_f:
+ * ---------------------------------------------------------------------
+ * params: unsigned int ninodo, struct STAT *p_stat
+ *
+ * Devuelve la metainformación de un directorio o fichero
+ *
+ * Devuelve EXIT_SUCCESS si se ha realizado correctamente o EXIT_FAILURE_1
+ * en caso de error
+ */
 int mi_stat_f(unsigned int ninodo, struct STAT *p_stat){
     struct inodo inodo;
-    if(leer_inodo(ninodo,&inodo)==EXIT_FAILURE){
+    if(leer_inodo(ninodo,&inodo)==EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //init type and permissions
@@ -241,11 +273,21 @@ int mi_stat_f(unsigned int ninodo, struct STAT *p_stat){
 
 }
 
+/**
+ *  Función: mi_chmod_f:
+ * ---------------------------------------------------------------------
+ * params: unsigned int ninodo, unsigned char permisos
+ *
+ * Cambia los permisos de un fichero/directorio
+ *
+ * Devuelve EXIT_SUCCESS si se ha realizado correctamente o EXIT_FAILURE_1
+ * en caso de error
+ */
 int mi_chmod_f(unsigned int ninodo, unsigned char permisos){
     struct inodo inodo;
-    if(leer_inodo(ninodo, &inodo)==EXIT_FAILURE){
+    if(leer_inodo(ninodo, &inodo)==EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
         }
     inodo.permisos = permisos;
     inodo.ctime = time(NULL);

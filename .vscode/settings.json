@@ -1,6 +1,8 @@
 {
     "C_Cpp.formatting": "Default",
     "files.associations": {
-        "ficheros_basico.h": "c"
+        "*.rmd": "markdown",
+        "ficheros_basico.h": "c",
+        "cstdlib": "c"
     }
 }

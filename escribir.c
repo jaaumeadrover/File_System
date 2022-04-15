@@ -5,7 +5,7 @@ int main(int argc, char const *argv[]){
 
     if (argc != 4){
         fprintf(stderr, "Error de sintaxis: ./escribir <nombre_dispositivo> <ninodo> <permisos>\n");
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //Definimos los 5 offsets 
@@ -14,16 +14,16 @@ int main(int argc, char const *argv[]){
     printf("Longitud del texto: %ld\n\n", strlen(argv[2]));
 
     //Montamos el dispositivo virtual
-    if (bmount(argv[1]) == EXIT_FAILURE){
+    if (bmount(argv[1]) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: al montar el dispositivo virtual en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     // Reservamos un inodo para la escritura y se comprueba.
     int ninodo = reservar_inodo('f', 6);
     if (ninodo == -1){
         fprintf(stderr, "Error: al reservar el inodo en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     // Iteramos para escribir en los distintos offsets declarados
@@ -36,7 +36,7 @@ int main(int argc, char const *argv[]){
 
         if ( bytesEscritos == -1){
             fprintf(stderr, "Error: al realizar mi_write_f() en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
         printf("Bytes escritos: %d\n\n", bytesEscritos);
 
@@ -50,7 +50,7 @@ int main(int argc, char const *argv[]){
         // Obtenemos la indo del inodo que acabamos de escribir
         if (mi_stat_f(ninodo, &stat)){
             fprintf(stderr, "Error: al realizar mi_stat_f() en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
 
         printf("stat.tamEnBytesLog = %d\n", stat.tamEnBytesLog);
@@ -61,16 +61,16 @@ int main(int argc, char const *argv[]){
             ninodo = reservar_inodo('f', 6);
             if (ninodo == -1){
             fprintf(stderr, "Error: al reservar el inodo en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
             }
 
         }
     }
 
     // Desmontamos el dispositivo virtual
-    if (bumount() == EXIT_FAILURE){
+    if (bumount() == EXIT_FAILURE_1){
         fprintf(stderr, "Error: al desmontar el dispositivo virtual en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     return EXIT_SUCCESS;
 }

@@ -16,7 +16,7 @@ int main(int argc, char const *argv[]){
     //Sintaxis incorrecta
     if (argc != 3){
         fprintf(stderr, "Error de sintaxis: leer <nombre_dispositivo><numero_inodo>\n");
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //Inicializamos el buffer declarado
@@ -25,13 +25,13 @@ int main(int argc, char const *argv[]){
     // Montamos el dispositivo virtual
     if (bmount(argv[1]) == -1){
         fprintf(stderr, "Error: al montar el dispositivo virtual en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //Leemos el superbloque
-    if (bread(0, &SB) == EXIT_FAILURE){
+    if (bread(0, &SB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: al leer el superblque en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     // Leemos el fichero 
@@ -50,15 +50,15 @@ int main(int argc, char const *argv[]){
     // Leemos el i¡nodo del archivo
     if (leer_inodo(ninodo, &inodo)){
         fprintf(stderr, "Error: al leer el inodo en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     fprintf(stderr, "total_bytesleidos: %d\ntamEnBytesLog: %d\n", bytesleidos, inodo.tamEnBytesLog);
         
     //Desmontamos el dispositivo virtual el dispositivo virtual
-    if (bumount() == EXIT_FAILURE){
+    if (bumount() == EXIT_FAILURE_1){
         fprintf(stderr, "Error: al desmontar el dispositivo virtual en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     return EXIT_SUCCESS;
 }

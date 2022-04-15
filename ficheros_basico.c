@@ -50,7 +50,7 @@ int tamAI(unsigned int ninodos){
  *
  * Inicializa los datos del superbloque.
  *
- * Devuelve EXIT_FAILURE en caso de un error de escritura o
+ * Devuelve EXIT_FAILURE_1 en caso de un error de escritura o
  * EXIT_SUCCESS en caso de no haberlo.
  */
 int initSB(unsigned int nbloques, unsigned int ninodos){
@@ -69,9 +69,9 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
     SB.totBloques = nbloques;
     SB.totInodos = ninodos;
     // escritura
-    if (bwrite(posSB, &SB) == EXIT_FAILURE){
+    if (bwrite(posSB, &SB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     return EXIT_SUCCESS;
 }
@@ -84,7 +84,7 @@ int initSB(unsigned int nbloques, unsigned int ninodos){
  * Inicializa el mapa de bits poniendo a 1 los bits que representan
  * los metadatos.
  *
- * Devuelve EXIT_FAILURE en caso de error o EXIT_SUCCESS en
+ * Devuelve EXIT_FAILURE_1 en caso de error o EXIT_SUCCESS en
  * caso de no haberlo.
  */
 int initMB(){
@@ -96,17 +96,17 @@ int initMB(){
     memset(bufferMB, 0, BLOCKSIZE);
 
     // leemos el superbloque
-    if (bread(posSB, &SB) == EXIT_FAILURE){
+    if (bread(posSB, &SB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     // Volcamos todo el contenido del buffer a memoria
     for (int i = SB.posPrimerBloqueMB; i <= SB.posUltimoBloqueMB; i++){
 
-        if((bwrite(i, bufferMB))==EXIT_FAILURE){
+        if((bwrite(i, bufferMB))==EXIT_FAILURE_1){
             fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
 
     }
@@ -126,21 +126,21 @@ int initMB(){
  *
  * Inicializa la lista de inodos libres.
  *
- * Devuelve EXIT_FAILURE en caso de error o EXIT_SUCCESS en caso
+ * Devuelve EXIT_FAILURE_1 en caso de error o EXIT_SUCCESS en caso
  * de no haberlo.
  */
 int initAI(){
     struct superbloque SB;
-    if (bread(posSB, &SB) == EXIT_FAILURE){
+    if (bread(posSB, &SB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     struct inodo inodos[BLOCKSIZE / INODOSIZE];
     int contInodos = SB.posPrimerInodoLibre + 1; // si hemos inicializado SB.posPrimerInodoLibre = 0
     for (int i = SB.posPrimerBloqueAI; i <= SB.posUltimoBloqueAI; i++){ // para cada bloque del AI
-        if(bread(i, inodos)==EXIT_FAILURE){
+        if(bread(i, inodos)==EXIT_FAILURE_1){
             fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
         for (int j = 0; j < (BLOCKSIZE / INODOSIZE); j++){                         // para cada inodo del AI
             inodos[j].tipo = 'l'; // libre
@@ -153,9 +153,9 @@ int initAI(){
                 // hay que salir del bucle, el último bloque no tiene por qué estar completo !!!
             }
         }
-        if (bwrite(i, inodos) == EXIT_FAILURE){
+        if (bwrite(i, inodos) == EXIT_FAILURE_1){
             fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
     }
     return EXIT_SUCCESS;
@@ -169,15 +169,15 @@ int initAI(){
  * Escribe el valor indicado por el parámetro bit: 0 (libre) ó 1 (ocupado) en un
  * determinado bit del MB que representa el bloque nbloque
  *
- * Devuelve EXIT_FAILURE en caso de error o EXIT_SUCCESS en caso
+ * Devuelve EXIT_FAILURE_1 en caso de error o EXIT_SUCCESS en caso
  * de no haberlo.
  */
 int escribir_bit(unsigned int nbloque, unsigned int bit){
     struct superbloque SB;
     // lectura para inicializar SB con datos del super bloque
-    if (bread(posSB, &SB) == EXIT_FAILURE){
+    if (bread(posSB, &SB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     // inicializar variables
     int posbyte = nbloque / 8;
@@ -187,9 +187,9 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
     unsigned char bufferMB[BLOCKSIZE];
 
     // lectura bloque indicado
-    if (bread(nbloqueabs, &bufferMB) == EXIT_FAILURE){
+    if (bread(nbloqueabs, &bufferMB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     posbyte = posbyte % BLOCKSIZE;
@@ -202,9 +202,9 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
         bufferMB[posbyte] &= ~mascara; // operadores AND y NOT para bits
     }
     // escritura
-    if (bwrite(nbloqueabs, bufferMB) == EXIT_FAILURE){
+    if (bwrite(nbloqueabs, bufferMB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     return EXIT_SUCCESS;
@@ -218,15 +218,15 @@ int escribir_bit(unsigned int nbloque, unsigned int bit){
  *
  * Lee un determinado bit del MB.
  *
- * Devuelve EXIT_FAILURE en caso de error o el valor del bit leido en 
+ * Devuelve EXIT_FAILURE_1 en caso de error o el valor del bit leido en 
  * caso de no haberlo
  */
 char leer_bit(unsigned int nbloque){
     struct superbloque SB;
     // lectura superbloque
-    if (bread(posSB, &SB) == EXIT_FAILURE){
+    if (bread(posSB, &SB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     // declaración variables
@@ -237,9 +237,9 @@ char leer_bit(unsigned int nbloque){
     unsigned char bufferMB[BLOCKSIZE];                 // buffer
 
     // lectura bloque determinado
-    if (bread(nbloqueabs, &bufferMB) == EXIT_FAILURE){
+    if (bread(nbloqueabs, &bufferMB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     // localizar byte concreto dentro del bloque
     posbyte = posbyte % BLOCKSIZE;
@@ -265,7 +265,7 @@ char leer_bit(unsigned int nbloque){
  * Encuentra el primer bloque libre, consultando el MB (primer bit a 0), 
  * lo ocupa
  *
- * Devuelve EXIT_FAILURE en caso de error o la posición absoluta del 
+ * Devuelve EXIT_FAILURE_1 en caso de error o la posición absoluta del 
  * bloque reservado
  */
 int reservar_bloque(){
@@ -280,7 +280,7 @@ int reservar_bloque(){
     //leemos superbloque
     if (bread(posSB, &SB) == -1) {
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //inicializamos buffer auxiliar
@@ -291,7 +291,7 @@ int reservar_bloque(){
         for (nbloqueabs = SB.posPrimerBloqueMB;nbloqueabs < SB.posUltimoBloqueMB;nbloqueabs++) {
             if (bread(nbloqueabs, bufferMB) == -1) {
                 fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-                return EXIT_FAILURE;
+                return EXIT_FAILURE_1;
             }
             if (memcmp(bufferMB, bufferAux, BLOCKSIZE) != 0) {
                 break;
@@ -314,9 +314,9 @@ int reservar_bloque(){
 
     nbloqueabs = ((nbloqueabs - SB.posPrimerBloqueMB) * BLOCKSIZE + posbyte) * 8 + posbit;
 
-    if (escribir_bit(nbloqueabs, 1) == EXIT_FAILURE){
+    if (escribir_bit(nbloqueabs, 1) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: escritura bit incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     SB.cantBloquesLibres--;
@@ -324,19 +324,19 @@ int reservar_bloque(){
     //Rellenar el bufffer con 0's
     memset(bufferAux, 0, BLOCKSIZE);
 
-    if (bwrite(SB.posPrimerBloqueDatos + nbloqueabs - 1, bufferAux) == EXIT_FAILURE){
+    if (bwrite(SB.posPrimerBloqueDatos + nbloqueabs - 1, bufferAux) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: escritura incorrecta en el método %s()\n",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
-       if (bwrite(posSB, &SB) == EXIT_FAILURE){
+       if (bwrite(posSB, &SB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
         return nbloqueabs;
     }else {
         fprintf(stderr,"NO QUEDAN BLOQUES LIBRES!!!");
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
 }
@@ -348,7 +348,7 @@ int reservar_bloque(){
  *
  * Libera un bloque determinado
  *
- * Devuelve EXIT_FAILURE en caso de error o el numero de bloque liberado
+ * Devuelve EXIT_FAILURE_1 en caso de error o el numero de bloque liberado
  */
 int liberar_bloque(unsigned int nbloque)
 {
@@ -356,7 +356,7 @@ int liberar_bloque(unsigned int nbloque)
     // lectura superbloque
     if (bread(posSB, &SB) == -1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     // Escribimos 0 en el MB y aumentamos nbloques libres
     escribir_bit(nbloque, 0);
@@ -365,7 +365,7 @@ int liberar_bloque(unsigned int nbloque)
     // Actualizamos el Superbloque
     if (bwrite(posSB, &SB) == -1){
         fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     // Devolvemos el número de bloque liberado
@@ -380,7 +380,7 @@ int liberar_bloque(unsigned int nbloque)
  * Escribe el contenido de una variable de tipo struct inodo en un 
  * determinado inodo del array de inodos.
  *
- * Devuelve EXIT_FAILURE en caso de error o EXIT_SUCCESS en caso
+ * Devuelve EXIT_FAILURE_1 en caso de error o EXIT_SUCCESS en caso
  * de no haberlo.
  */
 int escribir_inodo(unsigned int ninodo, struct inodo inodo){
@@ -391,7 +391,7 @@ int escribir_inodo(unsigned int ninodo, struct inodo inodo){
     // lectura superbloque
     if (bread(posSB, &SB) == -1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     // calcular posición inodo
@@ -401,7 +401,7 @@ int escribir_inodo(unsigned int ninodo, struct inodo inodo){
     // lectura Inodo
     if (bread(posInodo, inodos) == -1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     // escritura inodo
     int id = ninodo % (BLOCKSIZE / INODOSIZE);
@@ -410,7 +410,7 @@ int escribir_inodo(unsigned int ninodo, struct inodo inodo){
     // actualizamos bloque correspondiente
     if (bwrite(posInodo, inodos) == -1){
         fprintf(stderr, "Error: escritura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     return EXIT_SUCCESS;
@@ -424,24 +424,24 @@ int escribir_inodo(unsigned int ninodo, struct inodo inodo){
  * Lee un determinado inodo del array de inodos para volcarlo en una 
  * variable de tipo struct inodo pasada por referencia.
  *
- * Devuelve EXIT_FAILURE en caso de error o EXIT_SUCCESS en caso
+ * Devuelve EXIT_FAILURE_1 en caso de error o EXIT_SUCCESS en caso
  * de no haberlo.
  */
 int leer_inodo(unsigned int ninodo, struct inodo *inodo){
     struct superbloque SB;
 
-    if (bread(posSB, &SB) == EXIT_FAILURE){
+    if (bread(posSB, &SB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     // obtenemos el nº de bloque del array de inodos que tiene el inodo solicitado.
     unsigned int primerBloqInodo = SB.posPrimerBloqueAI + (ninodo / (BLOCKSIZE / INODOSIZE));
     // creamos el array de inodos
     struct inodo inodos[BLOCKSIZE / INODOSIZE];
     // calculamos que inodo del array de inodoos nos interesa leer
-    if (bread(primerBloqInodo, inodos) == EXIT_FAILURE){
+    if (bread(primerBloqInodo, inodos) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     // cambiamos el valor de la variable pasada por referencia
     int id = ninodo % (BLOCKSIZE / INODOSIZE);
@@ -459,20 +459,20 @@ int leer_inodo(unsigned int ninodo, struct inodo *inodo){
  * lo reserva, devuelve su número y actualiza la lista enlazada de inodos 
  * libres.
  *
- * Devuelve EXIT_FAILURE en caso de error o la posición del inodo reservado
+ * Devuelve EXIT_FAILURE_1 en caso de error o la posición del inodo reservado
  */
 int reservar_inodo(unsigned char tipo, unsigned char permisos){
     struct superbloque SB;
     struct inodo inodoAuxiliar;
     // lectura del superbloque
-    if (bread(posSB, &SB) == EXIT_FAILURE){
+    if (bread(posSB, &SB) == EXIT_FAILURE_1){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     // Quedan bloques restantes?
     if (SB.cantBloquesLibres == 0){
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     // Actualizamos los valores del superbloque
@@ -499,20 +499,32 @@ int reservar_inodo(unsigned char tipo, unsigned char permisos){
     }
 
     
-    if (escribir_inodo(posInodoReservado, inodoAuxiliar) == EXIT_FAILURE){
-        return EXIT_FAILURE;
+    if (escribir_inodo(posInodoReservado, inodoAuxiliar) == EXIT_FAILURE_1){
+        return EXIT_FAILURE_1;
     }
     struct inodo debug;
     leer_inodo(posInodoReservado,&debug);
 
 
-    if (bwrite(posSB, &SB) == EXIT_FAILURE){
-        return EXIT_FAILURE;
+    if (bwrite(posSB, &SB) == EXIT_FAILURE_1){
+        return EXIT_FAILURE_1;
     }
     // Escribimos el superbloque actualizado
     return posInodoReservado;
 }
 
+/**
+ *  Función: obtener_nRangoBL:
+ * ---------------------------------------------------------------------
+ * params: struct inodo *inodo, unsigned int nblogico, unsigned int *ptr
+ *
+ * Función auxiliar para obtener el rango de punteros en el que se situa
+ * el bloque lógico que buscamos (0:D, 1:I0, 2:I1, 3:I2), y obtenemos 
+ * además la dirección almacenada en el puntero correspondiente del inodo
+ *
+ * Devuelve la dirección almacenada en el puntero correspondiente del 
+ * inodo o, en caso de error EXIT_FAILURE_1 
+ */
 int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *ptr){
     if (nblogico < DIRECTOS){
         *ptr = inodo->punterosDirectos[nblogico];
@@ -533,6 +545,16 @@ int obtener_nRangoBL(struct inodo *inodo, unsigned int nblogico, unsigned int *p
     }
 }
 
+/**
+ *  Función: obtener_indice:
+ * ---------------------------------------------------------------------
+ * params: unsigned int nblogico, int nivel_punteros
+ *
+ * Función que generaliza la obtención de los índices de los bloques de 
+ * punteros
+ *
+ * Devuelve el indice de los bloques de punteros o EXIT_FAILURE_1 en caso de error
+ */
 int obtener_indice(unsigned int nblogico, int nivel_punteros){
     if (nblogico < DIRECTOS){
         return nblogico; // ej nblogico=8
@@ -557,6 +579,16 @@ int obtener_indice(unsigned int nblogico, int nivel_punteros){
     return -1;
 }
 
+/**
+ *  Función: traducir_bloque_inodo:
+ * ---------------------------------------------------------------------
+ * params: int ninodo, int nblogico, char reservar
+ *
+ * Esta función se encarga de obtener el numero de bloque físico 
+ * correspondiente a un bloque lógico determinado del inodo indicado.
+ *
+ * Devuelve la posición fisica del bloque o EXIT_FAILURE_1 en caso de error 
+ */
 int traducir_bloque_inodo(int ninodo, int nblogico, char reservar){
     struct inodo inodo;
     unsigned int ptr, ptr_ant;
@@ -594,9 +626,9 @@ int traducir_bloque_inodo(int ninodo, int nblogico, char reservar){
             }
         }
         else{
-            if(bread(ptr, buffer)==EXIT_FAILURE){
+            if(bread(ptr, buffer)==EXIT_FAILURE_1){
                 fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
-                return EXIT_FAILURE;
+                return EXIT_FAILURE_1;
             } // leemos del dispositivo el bloque de punteros ya existente
         }
         indice = obtener_indice(nblogico, nivel_punteros);
@@ -630,7 +662,15 @@ int traducir_bloque_inodo(int ninodo, int nblogico, char reservar){
     return ptr; // nº de bloque físico correspondiente al bloque de datos lógico, nblogico
 }
 
-
+/**
+ *  Función: liberar_inodo:
+ * ---------------------------------------------------------------------
+ * params: unsigned int ninodo
+ *
+ * Libera el inodo y todos los bloques de datos vinculados al inodo.
+ *
+ * Devuelve el número de inodo liberado o EXIT_FAILURE_1 en caso de error
+ */
 int liberar_inodo(unsigned int ninodo){
     struct superbloque SB;
     struct inodo inodo;
@@ -676,6 +716,15 @@ int liberar_inodo(unsigned int ninodo){
 
 }
 
+/**
+ *  Función: liberar_bloques_inodo:
+ * ---------------------------------------------------------------------
+ * params: unsigned int primerBL, struct inodo *inodo
+ *
+ * Se encarga de liberar los bloques de datos unidos al inodo.
+ *
+ * Devuelve el número de bloques liberados o EXIT_FAILURE_1 en caso de error
+ */
 int liberar_bloques_inodo(unsigned int primerBL, struct inodo *inodo){
     unsigned int nivel_punteros, indice, ptr, nBL, ultimoBL;
     int nRangoBL;

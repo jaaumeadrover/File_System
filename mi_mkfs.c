@@ -13,26 +13,26 @@ int main(int argc, char **argv){
 
     //Reservamos espacio
     if (!memset(buf, 0, BLOCKSIZE)){
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //Comprobamos la sintaxis
     if (argc != 3){
         fprintf(stderr, "Error sintaxis: ./mi_fks <nombre del fichero> <numero de bloques>\n");
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
 
     //Montaje
     if (bmount(camino) == -1){
         fprintf(stderr, "Error al montar el dispositivo.\n");
-        return EXIT_FAILURE;
+        return EXIT_FAILURE_1;
     }
     
     //Escritura
     for (int i = 0; i < nbloques; i++){
         if (bwrite(i, buf) == -1){
             fprintf(stderr, "Error escritura en el índice %i.\n", i);
-            return EXIT_FAILURE;
+            return EXIT_FAILURE_1;
         }
     }
     initSB(nbloques,ninodos);
