@@ -2,7 +2,7 @@
 //CONSTANTES PARA DEBUG DE CADA RESPECTIVO NIVEL
 #define DEBUGN1 0
 #define DEBUGN2 0
-#define DEBUGN3 0
+#define DEBUGN3 1
 #define DEBUGN4 0
 
 
@@ -44,11 +44,12 @@ int main(int argc, char const *argv[]){
     printf("cantInodosLibres = %d\n", SB.cantInodosLibres);
     printf("totBloques = %d\n", SB.totBloques);
     printf("totInodos = %d\n", SB.totInodos);
-
-    printf("\nsizeof struct superbloque: %ld\n", sizeof(struct superbloque));
-    printf("sizeof struct inodo:  %ld\n", sizeof(struct inodo));
-
+    
     #if DEBUGN2
+        printf("\nsizeof struct superbloque: %ld\n", sizeof(struct superbloque));
+        printf("sizeof struct inodo:  %ld\n", sizeof(struct inodo));
+
+    
         printf("\nRECORRIDO LISTA ENLAZADA DE INODOS LIBRES\n\n");
         
         struct inodo inodos[BLOCKSIZE / INODOSIZE];

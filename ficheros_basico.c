@@ -241,6 +241,11 @@ char leer_bit(unsigned int nbloque){
         fprintf(stderr, "Error: lectura incorrecta en el método %s()",__func__);
         return EXIT_FAILURE_1;
     }
+
+#if DEBUGN3
+    printf("[leer_bit(%i) → posbyte:%i, posbit:%i, nbloqueMB:%i, nbloqueabs:%i)]\n", nbloque, posbyte, posbit, nbloqueMB, nbloqueabs);
+#endif
+    
     // localizar byte concreto dentro del bloque
     posbyte = posbyte % BLOCKSIZE;
 
@@ -249,10 +254,6 @@ char leer_bit(unsigned int nbloque){
     mascara >>= posbit;           // mdesplazamiento derecha
     mascara &= bufferMB[posbyte]; // AND
     mascara >>= (7 - posbit);     // desplazamiento derecha
-
-#if DEBUGN3
-    printf("[leer_bit(%i) → posbyte:%i, posbit:%i, nbloqueMB:%i, nbloqueabs:%i)]\n", nbloque, posbyte, posbit, nbloqueMB, nbloqueabs);
-#endif
     
     return mascara;
 }
