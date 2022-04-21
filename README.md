@@ -1,1 +1,0 @@
-Pràctica Final SO2
