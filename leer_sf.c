@@ -2,8 +2,8 @@
 //CONSTANTES PARA DEBUG DE CADA RESPECTIVO NIVEL
 #define DEBUGN1 0
 #define DEBUGN2 0
-#define DEBUGN3 1
-#define DEBUGN4 0
+#define DEBUGN3 0
+#define DEBUGN4 1
 
 
 //La ejecución de leer_sf.c permite mostrar el contenido del superbloque.
@@ -44,7 +44,7 @@ int main(int argc, char const *argv[]){
     printf("cantInodosLibres = %d\n", SB.cantInodosLibres);
     printf("totBloques = %d\n", SB.totBloques);
     printf("totInodos = %d\n", SB.totInodos);
-    
+
     #if DEBUGN2
         printf("\nsizeof struct superbloque: %ld\n", sizeof(struct superbloque));
         printf("sizeof struct inodo:  %ld\n", sizeof(struct inodo));
