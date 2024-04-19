@@ -8,7 +8,8 @@ por pantalla, con una constante muy útil que nos proporciona el nombre del mét
 que se llama("__func__").Además, no hemos sabido optimizar el algoritmo iterativo, ya que utilizábamos
 un switch para poder avanzar los bloques según el respectivo nivel y no se optimiza el número de lecturas.
 
-<br>
+<br>![3D_foot](https://github.com/jaaumeadrover/File_System/assets/69900925/f2352c74-4cfa-4489-880c-db3b807e3a6e)
+
 ENTREGA 2:
 Una mejora es, en buscar_entrada y mi_dir, utilizar un buffer de entradas de tamaño BLOCKSIZE y 
 explorar éstas en memoria (en vez de leer 1 sola entrada cada vez), y así no tener que acceder al dispositivo para cada una de ellas.
